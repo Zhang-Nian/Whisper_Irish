@@ -1,0 +1,12 @@
+dataset: "Irish"
+
+
+###########################################################
+#                      WHISPER SETTING                    #
+###########################################################
+model_size: "small"               # three options: small, medium, large. small and medium are better than large
+tokenizer_language: "English"     # there are different languages you can select
+processor_language: "None"        # is same with tokenizer_language
+
+max_step: 4000
+
