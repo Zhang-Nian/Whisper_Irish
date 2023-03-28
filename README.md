@@ -1,16 +1,62 @@
+# Whisper
+
+[[Blog]](https://openai.com/blog/whisper)
+[[Paper]](https://arxiv.org/abs/2212.04356)
+[[Model card]](https://github.com/openai/whisper/blob/main/model-card.md)
+[[Colab example]](https://colab.research.google.com/github/openai/whisper/blob/master/notebooks/LibriSpeech.ipynb)
+
+Whisper is a general-purpose speech recognition model. It is trained on a large dataset of diverse audio and is also a multi-task model that can perform multilingual speech recognition as well as speech translation and language identification.
 
 
-第一步: 熟悉 finetune whisper 模型的流程，通过commonvoice 语料熟悉
+## Approach
 
-第二步：改写整个finetune 模块 （主要是爱尔兰语料的预处理以及如何放到 pytorch当中，主要是构建Dataset子类）
+![Approach](https://raw.githubusercontent.com/openai/whisper/main/approach.png)
 
-第三步：构建一个 mini dataset ，划分出训练集和测试集来检验整个finetune 流程的正确性
+A Transformer sequence-to-sequence model is trained on various speech processing tasks, including multilingual speech recognition, speech translation, spoken language identification, and voice activity detection. All of these tasks are jointly represented as a sequence of tokens to be predicted by the decoder, allowing for a single model to replace many different stages of a traditional speech processing pipeline. The multitask training format uses a set of special tokens that serve as task specifiers or classification targets.
 
-第四步：如何验证爱尔兰语和哪个语言的特性最像（主要是文本的表示，文本表示层面要大于语义层面）
 
-第五步： 如何对tokenizer做一个finetune训练，主要是现有的 whisper 中的tokenizer 不支持爱尔兰语， （https://blog.csdn.net/qq_35812205/article/details/120002522#21_tokenizer_251）
 
-第六步： 如何对爱尔兰语， 找到最合适的训练参数
+## Setup
 
-第七步： 分析识别错误的句子，统计出不同类型的错误后，再考虑其他方案提升模型
+We used Python 3.8 and [PyTorch](https://pytorch.org/) (gpu) to finetune models
+
+    pip install datasets
+    pip install transformers
+    pip install librosa
+    pip install evaluate
+    pip install jiwer
+    pip install gradio
+
+
+## Finetune
+
+[[Key link1]](https://huggingface.co/blog/fine-tune-whisper)
+[[Key link2]](https://github.com/huggingface/community-events/tree/main/whisper-fine-tuning-event#python-script)
+[[Key link3]](https://medium.com/@bofenghuang7/what-i-learned-from-whisper-fine-tuning-event-2a68dab1862)
+
+
+
+
+## Ideas of finetune
+
+    Step 1: Getting familiar with the flow of the finetune whisper model by using the commonvoice corpus
+
+    Step 2: Rewrite the entire finetune module (mainly pre-processing of the Irish corpus and how to put it into pytorch, mainly building Dataset subclasses)
+
+    Step 3: Build a mini dataset and divide the train dataset and test dataset to check the correctness of the whole finetune process
+
+    Step 4: How to do a finetune training on the tokenizer, mainly because the existing tokenizer in whisper does not support Irish
+
+        [[link1]](https://github.com/facebookresearch/fairseq/tree/main/examples/mbart)
+
+    Step 5: How to find the most suitable training parameters for the Irish speech
+
+    Step 6: The order of finetune, which parameter should be adjusted first, can it be adjusted separately?
+
+    Step 7: Consider optimizing Adam or Adafactor in training
+
+    Step 8: Use Data Enhancement to Boost Results
+
+    Step 9: Analyze the sentences that identify errors and count the different types of errors before considering other options to improve the model
+
 
