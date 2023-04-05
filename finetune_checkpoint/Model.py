@@ -64,10 +64,10 @@ class WhisperModelModule(LightningModule):
         o_list, l_list = [], []
         for o, l in zip(out, labels):
             o = torch.argmax(o, dim=1)
-            o_list.append(self.tokenizer.decode(o, skip_special_tokens=True))
-            #o_list.append(self.tokenizer.decode(o))
-	    l_list.append(self.tokenizer.decode(l, skip_special_tokens=True))
-            #l_list.append(self.tokenizer.decode(l))
+            #o_list.append(self.tokenizer.decode(o, skip_special_tokens=True))
+            o_list.append(self.tokenizer.decode(o))
+            #l_list.append(self.tokenizer.decode(l, skip_special_tokens=True))
+            l_list.append(self.tokenizer.decode(l))
         cer = self.metrics_cer.compute(references=l_list, predictions=o_list)
         wer = self.metrics_wer.compute(references=l_list, predictions=o_list)
 
