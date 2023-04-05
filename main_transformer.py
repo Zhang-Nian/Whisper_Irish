@@ -41,7 +41,7 @@ def get_args():
         "--config",
         type=str,
         required=False,
-        default="./config/finetune_irish.yaml",
+        default="./config/finetune_transformer_irish.yaml",
         help="yaml format configuration file.",
     )
 
