@@ -12,24 +12,13 @@ from finetune_checkpoint.Dataset import IrishSpeechDataset
 from finetune_checkpoint.DataCollator import WhisperDataCollatorWhithPadding
 
 
-class Config:
-    learning_rate = 0.0005
-    weight_decay = 0.01
-    adam_epsilon = 1e-8
-    warmup_steps = 2
-    batch_size = 16
-    num_worker = 2
-    num_train_epochs = 10
-    gradient_accumulation_steps = 1
-    sample_rate = 16000
-
-
 class WhisperModelModule(LightningModule):
-    def __init__(self, cfg:Config, model_name="small", lang="English", train_dataset=[], eval_dataset=[]) -> None:
+    def __init__(self, config, train_dataset=[], eval_dataset=[]) -> None:
         super().__init__()
-        self.options = whisper.DecodingOptions(language=lang, without_timestamps=True)
-        self.model = whisper.load_model(model_name)
-        self.tokenizer = whisper.tokenizer.get_tokenizer(True, language="English", task=self.options.task)
+        
+        self.options = whisper.DecodingOptions(language=config["tokenizer_language"], without_timestamps=True)
+        self.model = whisper.load_model(config["model_size"])
+        self.tokenizer = whisper.tokenizer.get_tokenizer(True, language=config["tokenizer_language"], task=self.options.task)
 
         # only decoder training
         for p in self.model.encoder.parameters():
@@ -39,7 +28,7 @@ class WhisperModelModule(LightningModule):
         self.metrics_wer = evaluate.load("wer")
         self.metrics_cer = evaluate.load("cer")
 
-        self.cfg = cfg
+        self.config = config
         self.__train_dataset = train_dataset
         self.__eval_dataset = eval_dataset
 
@@ -75,10 +64,10 @@ class WhisperModelModule(LightningModule):
         o_list, l_list = [], []
         for o, l in zip(out, labels):
             o = torch.argmax(o, dim=1)
-            #o_list.append(self.tokenizer.decode(o, skip_special_tokens=True))
-            o_list.append(self.tokenizer.decode(o))
-	    #l_list.append(self.tokenizer.decode(l, skip_special_tokens=True))
-            l_list.append(self.tokenizer.decode(l))
+            o_list.append(self.tokenizer.decode(o, skip_special_tokens=True))
+            #o_list.append(self.tokenizer.decode(o))
+	    l_list.append(self.tokenizer.decode(l, skip_special_tokens=True))
+            #l_list.append(self.tokenizer.decode(l))
         cer = self.metrics_cer.compute(references=l_list, predictions=o_list)
         wer = self.metrics_wer.compute(references=l_list, predictions=o_list)
 
@@ -99,7 +88,7 @@ class WhisperModelModule(LightningModule):
             {
                 "params": [p for n, p in model.named_parameters()
                             if not any(nd in n for nd in no_decay)],
-                "weight_decay": self.cfg.weight_decay,
+                "weight_decay": self.config["weight_decay"],
             },
             {
                 "params": [p for n, p in model.named_parameters()
@@ -108,13 +97,13 @@ class WhisperModelModule(LightningModule):
             },
         ]
         optimizer = AdamW(optimizer_grouped_parameters,
-                          lr=self.cfg.learning_rate,
-                          eps=self.cfg.adam_epsilon,
+                          lr=self.config["learning_rate"],
+                          eps=self.config["adam_epsilon"],
                           no_deprecation_warning=True)
         self.optimizer = optimizer
 
         scheduler = get_linear_schedule_with_warmup(
-            optimizer, num_warmup_steps=self.cfg.warmup_steps,
+            optimizer, num_warmup_steps=self.config["warmup_steps"],
             num_training_steps=self.t_total
         )
         self.scheduler = scheduler
@@ -124,24 +113,24 @@ class WhisperModelModule(LightningModule):
     def setup(self, stage=None):
         if stage == 'fit' or stage is None:
             self.t_total = (
-                (len(self.__train_dataset) // (self.cfg.batch_size))
-                // self.cfg.gradient_accumulation_steps
-                * float(self.cfg.num_train_epochs)
+                (len(self.__train_dataset) // (self.config["batch_size"]))
+                // self.config["gradient_accumulation_steps"]
+                * float(self.config["num_train_epochs"])
             )
 
     def train_dataloader(self):
-        dataset = IrishSpeechDataset(self.__train_dataset, self.tokenizer, self.cfg.sample_rate)
+        dataset = IrishSpeechDataset(self.__train_dataset, self.tokenizer, self.config["sample_rate"])
         return torch.utils.data.DataLoader(dataset,
-                          batch_size=self.cfg.batch_size,
-                          drop_last=True, shuffle=True, num_workers=self.cfg.num_worker,
+                          batch_size=self.config["batch_size"],
+                          drop_last=True, shuffle=True, num_workers=self.config["num_worker"],
                           collate_fn=WhisperDataCollatorWhithPadding()
                           )
 
     def val_dataloader(self):
-        dataset = IrishSpeechDataset(self.__eval_dataset, self.tokenizer, self.cfg.sample_rate)
+        dataset = IrishSpeechDataset(self.__eval_dataset, self.tokenizer, self.config["sample_rate"])
         return torch.utils.data.DataLoader(dataset,
-                          batch_size=self.cfg.batch_size,
-                          num_workers=self.cfg.num_worker,
+                          batch_size=self.config["batch_size"],
+                          num_workers=self.config["num_worker"],
                           collate_fn=WhisperDataCollatorWhithPadding()
                           )
 

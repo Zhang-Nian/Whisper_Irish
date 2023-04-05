@@ -1,5 +1,27 @@
 dataset: "Irish"
 
+output_dir: "./content"
 
+
+###########################################################
+#                      WHISPER SETTING                    #
+###########################################################
+model_size: "small"               # three options: small, medium, large. small and medium are better than large
+tokenizer_language: "English"     # there are different languages you can select
+
+
+###########################################################
+#                      TRAINING SETTING                   #
+###########################################################
+precision: 16
+
+learning_rate: 0.0005
+weight_decay: 0.01
+adam_epsilon: 0.00000001
+warmup_steps: 2
+batch_size: 16
+num_worker: 2
+num_train_epochs: 10
+gradient_accumulation_steps: 1
 sample_rate: 16000
 

@@ -9,7 +9,7 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from finetune_checkpoint.Utils import load_irish_data
-from finetune_checkpoint.Model import Config, WhisperModelModule
+from finetune_checkpoint.Model import WhisperModelModule
 
 
 def get_args():
@@ -74,31 +74,24 @@ def main():
         print("train num is :", len(train_list))
         print("test num is :", len(test_list))
 
-        log_output_dir = "./content/logs"
-        check_output_dir = "./content/artifacts"
-
-        train_id = "00001"
-
-        model_name = "small"
-        lang = "English"
-
-        cfg = Config()
+        log_output_dir = os.path.join(config["output_dir"], "logs")
+        check_output_dir = os.path.join(config["output_dir"], "checkpoints")
 
         os.makedirs(log_output_dir, exist_ok=True)
         os.makedirs(check_output_dir, exist_ok=True)
 
         tflogger = TensorBoardLogger(save_dir=log_output_dir, name="whisper-Irish", version="00001")
 
-        checkpoint_callback = ModelCheckpoint(dirpath=f"{check_output_dir}/checkpoint", filename="checkpoint-{epoch:04d}", save_top_k=-1 # all model save)
+        checkpoint_callback = ModelCheckpoint(dirpath=check_output_dir, filename="checkpoint-{epoch:04d}", save_top_k=-1)
 
         callback_list = [checkpoint_callback, LearningRateMonitor(logging_interval="epoch")]
-        model = WhisperModelModule(cfg, model_name, lang, train_list, test_list)
+        model = WhisperModelModule(config, train_list, test_list)
 
         trainer = Trainer(
-            precision=16,
+            precision=config["precision"],
             accelerator="gpu",
-            max_epochs=cfg.num_train_epochs,
-            accumulate_grad_batches=cfg.gradient_accumulation_steps,
+            max_epochs=config["num_train_epochs"],
+            accumulate_grad_batches=config["gradient_accumulation_steps"],
             logger=tflogger,
             callbacks=callback_list
         )
