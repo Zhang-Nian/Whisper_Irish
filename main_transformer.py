@@ -69,7 +69,10 @@ def main():
 
     if config["dataset"] == "Irish":
         print("start to finetune Irish")
-        
+
+        # modify out dir name, it depends on the config 
+        config["outputdir"] = config["outputdir"] + "_" + config["model_size"] + "_" + config["tokenizer_language"]
+
         # load irish data
         train_wav, train_text = load_irish_data(config["trainfile"])
         test_wav, test_text = load_irish_data(config["testfile"])

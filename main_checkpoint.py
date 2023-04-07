@@ -32,6 +32,14 @@ def get_args():
     )
 
     parser.add_argument(
+        "--outputdir",
+        type=str,
+        required=False,
+        default="./whisper_checkpoint_finetune",
+        help="directory to dump feature files.",
+    )
+
+    parser.add_argument(
         "--gpu",
         type=str,
         required=False,
@@ -66,16 +74,18 @@ def main():
     if config["dataset"] == "Irish":
         print("start to finetune Irish")
 
+        # modify out dir name, it depends on the config
+        config["outputdir"] = config["outputdir"] + "_" + config["model_size"] + "_" + config["tokenizer_language"]
+
         # load train and test dataset
         train_list = load_irish_data(config["trainfile"])
-
         test_list = load_irish_data(config["testfile"])
 
         print("train num is :", len(train_list))
         print("test num is :", len(test_list))
 
-        log_output_dir = os.path.join(config["output_dir"], "logs")
-        check_output_dir = os.path.join(config["output_dir"], "checkpoints")
+        log_output_dir = os.path.join(config["outputdir"], "logs")
+        check_output_dir = os.path.join(config["outputdir"], "checkpoints")
 
         os.makedirs(log_output_dir, exist_ok=True)
         os.makedirs(check_output_dir, exist_ok=True)
