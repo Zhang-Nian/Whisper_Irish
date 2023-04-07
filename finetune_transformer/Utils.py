@@ -4,11 +4,10 @@ import soundfile as sf
 import numpy as np
 
 
-def load_irish_data():
+def load_irish_data(file_path):
     wav_list = []
     text_list = []
 
-    file_path = "train.list"
     f = open(file_path)
     readlines = f.readlines()
 
