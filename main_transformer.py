@@ -79,17 +79,18 @@ def main():
         print("train size is :", len(train_wav))
         print("test size is :", len(test_wav))
 
-        # generate special format in order to train
-        irish_common_voice = make_special_format_like_commonvoice(train_wav, test_wav, train_text, test_text)
-
         # generate pytorch dataset
-        train_dataset = IrishDataSet(config, irish_common_voice["train"])
-        test_dataset = IrishDataSet(config, irish_common_voice["test"])
+        train_dataset = IrishDataSet(config, train_wav, train_text)
+        test_dataset = IrishDataSet(config, test_wav, test_text)
         
+        print("generate train and test dataset finish")
+
         # define data collator
         data_collator = DataCollatorSpeechSeq2SeqWithPadding(config)
 
         trainer = FinetuneIrish(config)
+
+        print("define trainer finish")
 
         trainer.train(config, train_dataset, test_dataset, data_collator)
 
