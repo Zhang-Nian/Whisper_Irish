@@ -2,10 +2,10 @@ import os
 import argparse
 import yaml
 
-from finetune_transformer.Utils import load_irish_data, make_special_format_like_commonvoice
-from finetune_transformer.Dataset import IrishDataSet
-from finetune_transformer.DataCollator import DataCollatorSpeechSeq2SeqWithPadding
-from finetune_transformer.Finetune_Irish import FinetuneIrish
+from finetune.Utils import load_irish_data, make_special_format_like_commonvoice
+from finetune.Dataset import IrishDataSet
+from finetune.DataCollator import DataCollatorSpeechSeq2SeqWithPadding
+from finetune.Finetune_Irish import FinetuneIrish
 
 
 def get_args():
@@ -31,7 +31,7 @@ def get_args():
         "--outputdir",
         type=str,
         required=False,
-        default="./whisper_transformer_finetune",
+        default="./whisper_finetune",
         help="directory to dump feature files.",
     )
 
@@ -47,7 +47,7 @@ def get_args():
         "--config",
         type=str,
         required=False,
-        default="./config/finetune_transformer_irish.yaml",
+        default="./config/finetune_Irish.yaml",
         help="yaml format configuration file.",
     )
 
