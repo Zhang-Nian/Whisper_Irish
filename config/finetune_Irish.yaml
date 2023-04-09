@@ -3,7 +3,7 @@ dataset: "Irish"
 ###########################################################
 #                      WHISPER SETTING                    #
 ###########################################################
-model_size: "small"               # three options: small, medium, large. small and medium are better than large
+model_size: "medium"               # three options: small, medium, large. small and medium are better than large
 tokenizer_language: "english"     # there are different languages you can select
 processor_language: "None"        # is same with tokenizer_language
 
@@ -15,7 +15,7 @@ per_device_train_batch_size: 16
 gradient_accumulation_steps: 1
 learning_rate: 0.00001            # 1e-5
 warmup_steps: 500
-max_steps: 20000
+max_steps: 15000
 gradient_checkpointing: True
 fp16: True
 evaluation_strategy: "steps"

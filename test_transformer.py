@@ -1,3 +1,6 @@
+import soundfile as sf
+import numpy as np
+
 import torch
 import torchaudio
 
@@ -8,8 +11,8 @@ from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 device = "cpu"
 
 # Load model
-model = AutoModelForSpeechSeq2Seq.from_pretrained("whisper_finetune_small_English").to(device)
-processor = AutoProcessor.from_pretrained("whisper_finetune_small_English", language="None", task="transcribe")
+model = AutoModelForSpeechSeq2Seq.from_pretrained("./whisper_finetune_small_English").to(device)
+processor = AutoProcessor.from_pretrained("./whisper_finetune_small_English", language="None", task="transcribe")
 
 # NB: set forced_decoder_ids for generation utils
 model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(language="de", task="transcribe")
@@ -18,10 +21,14 @@ model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(language="de"
 model_sample_rate = processor.feature_extractor.sampling_rate
 
 # Load data
-ds_mcv_test = load_dataset("mozilla-foundation/common_voice_11_0", "de", split="test", streaming=True)
-test_segment = next(iter(ds_mcv_test))
-waveform = torch.from_numpy(test_segment["audio"]["array"])
-sample_rate = test_segment["audio"]["sampling_rate"]
+
+wav_path = "/media/storage/phonetics/asr_data_irish/recognition/mileglor/oir22_extraspks/06cc6562-0562-4efa-b620-81b6d5b3de33_grownups_0072/06cc6562-0562-4efa-b620-81b6d5b3de33_grownups_0072.wav"
+
+audio, rate = sf.read(wav_path)
+
+#waveform = torch.from_numpy(audio)
+waveform = torch.from_numpy(audio.astype(np.float32))
+sample_rate = rate
 
 # Resample
 if sample_rate != model_sample_rate:
@@ -39,6 +46,8 @@ generated_ids = model.generate(inputs=input_features, max_new_tokens=225)  # gre
 
 # Detokenize
 generated_sentences = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+print("generated_sentences is :", generated_sentences)
 
 # Normalise predicted sentences if necessary
 
