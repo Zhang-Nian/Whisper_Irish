@@ -1,3 +1,5 @@
+import os
+import sys
 import soundfile as sf
 import numpy as np
 
@@ -46,8 +48,13 @@ generated_ids = model.generate(inputs=input_features, max_new_tokens=225)  # gre
 
 # Detokenize
 generated_sentences = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-
 print("generated_sentences is :", generated_sentences)
 
 # Normalise predicted sentences if necessary
+
+if __name__ == "__main__":
+    if len(sys.argv) < 4:
+        print("Usage: python generate_list.py wav.scp text output_file")
+        exit()
+    main()
 
